@@ -14,11 +14,17 @@ function saveTasks() {
 
 function renderTasks() {
   taskList.innerHTML = "";
-  const filtered = tasks.filter(task => {
-    if (filter === "all") return true;
-    if (filter === "active") return !task.completed;
-    if (filter === "completed") return task.completed;
-  });
+
+  const filtered = tasks
+    .filter(task => {
+      if (filter === "all") return true;
+      if (filter === "active") return !task.completed;
+      if (filter === "completed") return task.completed;
+    })
+    .sort((a, b) => {
+      const priorityOrder = { high: 1, medium: 2, low: 3 };
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    });
 
   filtered.forEach((task, index) => {
     const li = document.createElement("li");

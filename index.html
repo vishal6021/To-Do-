@@ -2,35 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TaskZen - ToDo App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title> To-Do App</title>
   <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
 </head>
 <body>
   <div class="container">
     <header>
-      <h1 id="head"> Task To Do....</h1>
-      <button id="themeToggle" aria-label="Toggle Theme" title="Toggle Light/Dark Mode">🌞 / 🌙</button>
+      <h2 id="head">📋 To-Do List</h2>
+      <button id="themeToggle">🌞</button>
     </header>
 
     <div class="input-group">
-      <input type="text" id="taskInput" placeholder="Add a new task..." aria-label="New Task Input" />
-      <select id="prioritySelect" aria-label="Select Task Priority">
-        <option value="low">Low 🔵</option>
-        <option value="medium">Medium 🟡</option>
-        <option value="high">High 🔴</option>
+      <input type="text" id="taskInput" placeholder="Enter a new task..." />
+      <select id="prioritySelect">
+        <option value="high">High</option>
+        <option value="medium" selected>Medium</option>
+        <option value="low">Low</option>
       </select>
-      <button id="addTaskBtn" aria-label="Add Task">➕ Add</button>
+      <button id="addTaskBtn">Add</button>
     </div>
 
-    <div class="filters" role="group" aria-label="Filter Tasks">
-      <button class="filter active" data-filter="all">All 📋</button>
-      <button class="filter" data-filter="active">Active ✅</button>
-      <button class="filter" data-filter="completed">Completed ✔️</button>
+    <div class="filters">
+      <button class="filter active" data-filter="all">All</button>
+      <button class="filter" data-filter="active">Active</button>
+      <button class="filter" data-filter="completed">Completed</button>
     </div>
 
-    <ul id="taskList" aria-label="Task List"></ul>
+    <ul id="taskList"></ul>
   </div>
 
   <script src="script.js"></script>
