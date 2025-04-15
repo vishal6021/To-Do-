@@ -1,32 +1,62 @@
-let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-let filter = "all";
-
 const taskInput = document.getElementById("taskInput");
-const addTaskBtn = document.getElementById("addTaskBtn");
 const prioritySelect = document.getElementById("prioritySelect");
+const addTaskBtn = document.getElementById("addTaskBtn");
 const taskList = document.getElementById("taskList");
-const themeToggle = document.getElementById("themeToggle");
 const filterButtons = document.querySelectorAll(".filter");
+const themeToggle = document.getElementById("themeToggle");
 
-function saveTasks() {
-  localStorage.setItem("tasks", JSON.stringify(tasks));
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let currentFilter = "all";
+
+// Priority sorting map
+const priorityOrder = {
+  high: 3,
+  medium: 2,
+  low: 1
+};
+
+addTaskBtn.addEventListener("click", addTask);
+taskInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") addTask();
+});
+
+filterButtons.forEach(btn =>
+  btn.addEventListener("click", () => {
+    filterButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentFilter = btn.dataset.filter;
+    renderTasks();
+  })
+);
+
+themeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+});
+
+function addTask() {
+  const text = taskInput.value.trim();
+  const priority = prioritySelect.value;
+  if (!text) return;
+
+  tasks.push({ id: Date.now(), text, priority, completed: false });
+  saveTasks();
+  taskInput.value = "";
+  renderTasks();
 }
 
 function renderTasks() {
   taskList.innerHTML = "";
 
-  const filtered = tasks
-    .filter(task => {
-      if (filter === "all") return true;
-      if (filter === "active") return !task.completed;
-      if (filter === "completed") return task.completed;
-    })
-    .sort((a, b) => {
-      const priorityOrder = { high: 1, medium: 2, low: 3 };
-      return priorityOrder[a.priority] - priorityOrder[b.priority];
-    });
+  let filtered = tasks.filter(task =>
+    currentFilter === "all" ? true :
+    currentFilter === "completed" ? task.completed :
+    !task.completed
+  );
 
-  filtered.forEach((task, index) => {
+  // Sort by priority: High > Medium > Low
+  filtered.sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority]);
+
+  filtered.forEach((task) => {
     const li = document.createElement("li");
     li.className = `task-item ${task.priority} ${task.completed ? "completed" : ""}`;
 
@@ -36,7 +66,7 @@ function renderTasks() {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = task.completed;
-    checkbox.addEventListener("change", () => toggleComplete(index));
+    checkbox.addEventListener("change", () => toggleComplete(task.id));
 
     const span = document.createElement("span");
     span.textContent = task.text;
@@ -49,12 +79,12 @@ function renderTasks() {
     const editBtn = document.createElement("button");
     editBtn.innerHTML = "✏️";
     editBtn.title = "Edit Task";
-    editBtn.addEventListener("click", () => editTask(index));
+    editBtn.addEventListener("click", () => editTask(task.id));
 
     const delBtn = document.createElement("button");
     delBtn.innerHTML = "🗑️";
     delBtn.title = "Delete Task";
-    delBtn.addEventListener("click", () => deleteTask(index));
+    delBtn.addEventListener("click", () => deleteTask(task.id));
 
     actions.append(editBtn, delBtn);
     li.append(label, actions);
@@ -62,63 +92,37 @@ function renderTasks() {
   });
 }
 
-function addTask() {
-  const text = taskInput.value.trim();
-  const priority = prioritySelect.value;
-  if (text === "") return;
-
-  tasks.push({ text, priority, completed: false });
-  taskInput.value = "";
-  saveTasks();
-  renderTasks();
-}
-
-function toggleComplete(index) {
-  tasks[index].completed = !tasks[index].completed;
-  saveTasks();
-  renderTasks();
-}
-
-function deleteTask(index) {
-  if (confirm("Are you sure you want to delete this task?")) {
-    tasks.splice(index, 1);
+function toggleComplete(id) {
+  const task = tasks.find(t => t.id === id);
+  if (task) {
+    task.completed = !task.completed;
     saveTasks();
     renderTasks();
   }
 }
 
-function editTask(index) {
-  const current = tasks[index].text;
-  const newText = prompt("Edit your task:", current);
-  if (newText !== null) {
-    const trimmed = newText.trim();
-    if (trimmed !== "") {
-      tasks[index].text = trimmed;
+function deleteTask(id) {
+  if (confirm("Are you sure you want to delete this task?")) {
+    tasks = tasks.filter(t => t.id !== id);
+    saveTasks();
+    renderTasks();
+  }
+}
+
+function editTask(id) {
+  const task = tasks.find(t => t.id === id);
+  if (task) {
+    const newText = prompt("Edit your task:", task.text);
+    if (newText !== null && newText.trim() !== "") {
+      task.text = newText.trim();
       saveTasks();
       renderTasks();
     }
   }
 }
 
-addTaskBtn.addEventListener("click", addTask);
-
-taskInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") addTask();
-});
-
-filterButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    filterButtons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    filter = btn.dataset.filter;
-    renderTasks();
-  });
-});
-
-themeToggle.addEventListener("click", () => {
-  document.body.classList.toggle("dark");
-  const isDark = document.body.classList.contains("dark");
-  themeToggle.textContent = isDark ? "🌙" : "🌞";
-});
+function saveTasks() {
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
 
 renderTasks();
